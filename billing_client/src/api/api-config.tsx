@@ -43,7 +43,7 @@ class ApiConfig {
                     if (!isHandlingUnauthorized) {
                         isHandlingUnauthorized = true;
                         store.dispatch(authLogout());
-                        window.location.href = appHref('/login');
+                        window.location.href = appHref('/');
                     }
                 }
                 return Promise.reject(error);

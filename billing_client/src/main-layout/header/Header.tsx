@@ -49,7 +49,7 @@ const Header = () => {
 
     const handleLogout = () => {
         dispatch(authLogout())
-        window.location.href = appHref('/login')
+        window.location.href = appHref('/')
     }
 
     return (
