@@ -164,7 +164,15 @@ const ProductPage: React.FC = () => {
             </div>
             <div className="mst-fg span-2">
               <label>{heads.head3} Name <span className="req">*</span></label>
-              <input className="mst-inp" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <input
+                className="mst-inp"
+                value={form.name}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const name = value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
+                  setForm({ ...form, name });
+                }}
+              />
             </div>
             <div className="mst-fg">
               <label>{heads.head3} Code</label>
