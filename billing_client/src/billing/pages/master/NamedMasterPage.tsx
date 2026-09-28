@@ -119,9 +119,9 @@ const NamedMasterPage: React.FC<Props> = ({ title, icon, load, save, block, adde
             <table className="mst-table">
               <thead>
                 <tr>
-                  <th style={{ width: 50 }}>#</th>
+                  <th className="mst-col-idx">#</th>
                   <th>Name</th>
-                  <th style={{ width: 80 }}>Action</th>
+                  <th className="mst-col-act">Action</th>
                 </tr>
               </thead>
               <tbody>

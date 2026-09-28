@@ -10,6 +10,7 @@ public class BulkProductData {
     private Integer gst;
     private String categoryName;
     private Double mrp;
+    private Double actualMrp;
     private Long batchId;
     private Double cost;
     private String brandName;

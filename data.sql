@@ -340,6 +340,7 @@ CREATE TABLE `prod_batch` (
   `product_id` int NOT NULL,
   `cost` double(10,3) DEFAULT '0.000',
   `mrp` double(10,3) DEFAULT '0.000',
+  `actual_mrp` double(10,3) DEFAULT '0.000',
   `commission` double(10,3) DEFAULT '0.000',
   `stock` decimal(10,2) NOT NULL,
   `disc_type` int DEFAULT '0' COMMENT '1=rs 2=%',
@@ -356,12 +357,12 @@ CREATE TABLE `prod_batch` (
 
 /*Data for the table `prod_batch` */
 
-insert  into `prod_batch`(`id`,`name`,`product_id`,`cost`,`mrp`,`commission`,`stock`,`disc_type`,`discount`,`date`,`time`,`added_stock`,`uid`) values 
-(1,'ZSP001',1,50.000,100.000,0.000,16.00,1,0.000,'2026-07-29','23:05:46',10.00,1),
-(2,'Z102',2,10.000,20.000,0.000,16.00,0,0.000,'2026-07-29','23:05:46',0.00,1),
-(3,'Z101',3,200.000,400.000,0.000,98.00,0,0.000,'2026-08-29','19:27:22',0.00,1),
-(4,'Z103',4,200.000,300.000,0.000,0.00,0,0.000,'2026-09-01','15:20:45',0.00,1),
-(5,'Z104',5,20.000,25.000,0.000,9.00,0,0.000,'2026-09-01','15:21:57',0.00,1);
+insert  into `prod_batch`(`id`,`name`,`product_id`,`cost`,`mrp`,`actual_mrp`,`commission`,`stock`,`disc_type`,`discount`,`date`,`time`,`added_stock`,`uid`) values 
+(1,'ZSP001',1,50.000,100.000,100.000,0.000,16.00,1,0.000,'2026-07-29','23:05:46',10.00,1),
+(2,'Z102',2,10.000,20.000,20.000,0.000,16.00,0,0.000,'2026-07-29','23:05:46',0.00,1),
+(3,'Z101',3,200.000,400.000,400.000,0.000,98.00,0,0.000,'2026-08-29','19:27:22',0.00,1),
+(4,'Z103',4,200.000,300.000,300.000,0.000,0.00,0,0.000,'2026-09-01','15:20:45',0.00,1),
+(5,'Z104',5,20.000,25.000,25.000,0.000,9.00,0,0.000,'2026-09-01','15:21:57',0.00,1);
 
 /*Table structure for table `prod_batch_updated` */
 

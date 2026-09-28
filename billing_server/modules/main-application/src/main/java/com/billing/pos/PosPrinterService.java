@@ -314,7 +314,15 @@ public class PosPrinterService {
             totals.taxable.merge(gstPer, taxable, Double::sum);
             totals.cgst.merge(gstPer, gstAmt / 2, Double::sum);
             totals.sgst.merge(gstPer, gstAmt / 2, Double::sum);
-            sb.append(itemRow(nz(item.getName()), qtyStr(item.getQty()), DF.format(price), DF.format(total), gstPer, width));
+            sb.append(itemRow(
+                    nz(item.getName()),
+                    qtyStr(item.getQty()),
+                    DF.format(n(item.getMrp()) > 0 ? n(item.getMrp()) : price),
+                    DF.format(price),
+                    DF.format(total),
+                    gstPer,
+                    width
+            ));
             if (disc > 0) {
                 sb.append(padLeft("Disc: -" + DF.format(disc), width)).append('\n');
             }
@@ -349,23 +357,49 @@ public class PosPrinterService {
     }
 
     private String itemHeader(int width) {
-        if (width == WIDTH_58) {
-            return padRight("ITEM", 18) + padRight("Q", 4) + padLeft("RATE", 5) + padLeft("AMT", 5) + "\n";
-        }
-        return padRight("ITEM", 28) + padRight("QTY", 6) + padLeft("RATE", 7) + padLeft("AMT", 7) + "\n";
+        int[] cols = numberCols(width);
+        return "ITEM\n"
+                + padLeft("QTY", cols[0])
+                + padLeft("MRP", cols[1])
+                + padLeft("RATE", cols[2])
+                + padLeft("AMT", cols[3])
+                + "\n";
     }
 
-    private String itemRow(String name, String qty, String rate, String amt, int gstPer, int width) {
-        int nameWidth = width == WIDTH_58 ? 18 : 28;
-        int qtyW = width == WIDTH_58 ? 4 : 6;
-        int numW = width == WIDTH_58 ? 5 : 7;
-        if (gstPer > 0 && name.length() < nameWidth - 5) {
-            name = name + "(" + gstPer + "%)";
+    private String itemRow(String name, String qty, String mrp, String rate, String amt, int gstPer, int width) {
+        String display = name == null ? "" : name;
+        if (gstPer > 0) {
+            display = display + " (" + gstPer + "%)";
         }
-        if (name.length() > nameWidth) {
-            name = name.substring(0, nameWidth);
+        int[] cols = numberCols(width);
+        return wrapName(display, width)
+                + padLeft(qty, cols[0])
+                + padLeft(mrp, cols[1])
+                + padLeft(rate, cols[2])
+                + padLeft(amt, cols[3])
+                + "\n";
+    }
+
+    /** QTY / MRP / RATE / AMT — wide enough for 5+ digit amounts. */
+    private int[] numberCols(int width) {
+        if (width == WIDTH_58) {
+            return new int[]{4, 9, 9, 10};
         }
-        return padRight(name, nameWidth) + padRight(qty, qtyW) + padLeft(rate, numW) + padLeft(amt, numW) + "\n";
+        return new int[]{6, 13, 14, 15};
+    }
+
+    private String wrapName(String name, int width) {
+        if (name == null || name.isBlank()) {
+            return "\n";
+        }
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        while (i < name.length()) {
+            int end = Math.min(i + width, name.length());
+            sb.append(name, i, end).append('\n');
+            i = end;
+        }
+        return sb.toString();
     }
 
     private String formatTotal(String label, String value, int width) {

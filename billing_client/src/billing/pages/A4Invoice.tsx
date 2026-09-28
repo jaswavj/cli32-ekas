@@ -12,6 +12,7 @@ type Line = {
   unitName?: string;
   qty: number;
   price: number;
+  mrp?: number;
   discount: number;
   total: number;
   gst: number;
@@ -94,15 +95,16 @@ export const A4Invoice: React.FC<{ bill: any }> = ({ bill }) => {
         <table className="a4-items">
           <thead>
             <tr>
-              <th style={{ width: '5%' }}>S.No</th>
-              <th style={{ width: '30%' }}>Item name</th>
+              <th style={{ width: '4%' }}>S.No</th>
+              <th style={{ width: '26%' }}>Item name</th>
               <th style={{ width: '8%' }}>HSN/SAC</th>
-              <th style={{ width: '10%' }}>price/Unit</th>
+              <th style={{ width: '8%' }}>MRP</th>
+              <th style={{ width: '9%' }}>Rate</th>
               <th style={{ width: '5%' }}>Qty</th>
               <th style={{ width: '8%' }}>Taxable</th>
               <th style={{ width: '10%' }}>CGST</th>
               <th style={{ width: '10%' }}>SGST</th>
-              <th style={{ width: '14%' }}>Amount</th>
+              <th style={{ width: '12%' }}>Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -116,6 +118,7 @@ export const A4Invoice: React.FC<{ bill: any }> = ({ bill }) => {
                   <td style={{ textAlign: 'center' }}>{i + 1}</td>
                   <td><b>{name}</b></td>
                   <td style={{ textAlign: 'center' }}>{item.hsn || ''}</td>
+                  <td style={{ textAlign: 'right' }}>{money(item.mrp || item.price)}</td>
                   <td style={{ textAlign: 'right' }}>{money(item.price)}</td>
                   <td style={{ textAlign: 'center' }}>{item.qty}{item.unitName ? ` ${item.unitName}` : ''}</td>
                   <td style={{ textAlign: 'right' }}>{money(taxAmt)}</td>
@@ -127,7 +130,7 @@ export const A4Invoice: React.FC<{ bill: any }> = ({ bill }) => {
             })}
             {Array.from({ length: emptyRows }).map((_, i) => (
               <tr className="a4-empty" key={`e${i}`}>
-                {Array.from({ length: 9 }).map((__, c) => (
+                {Array.from({ length: 10 }).map((__, c) => (
                   <td key={c}>&nbsp;</td>
                 ))}
               </tr>
@@ -135,7 +138,7 @@ export const A4Invoice: React.FC<{ bill: any }> = ({ bill }) => {
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={4} style={{ textAlign: 'right' }}>Total</td>
+              <td colSpan={5} style={{ textAlign: 'right' }}>Total</td>
               <td style={{ textAlign: 'center' }}>{calc.qty}</td>
               <td style={{ textAlign: 'right' }}>{money(calc.taxable)}</td>
               <td style={{ textAlign: 'right' }}>{money(calc.cgst)}</td>

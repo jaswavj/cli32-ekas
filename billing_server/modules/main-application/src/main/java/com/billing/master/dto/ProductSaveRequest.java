@@ -14,6 +14,7 @@ public class ProductSaveRequest {
     private Double stock;
     private Double cost;
     private Double mrp;
+    private Double actualMrp;
     private Double commission;
     private Integer discType;
     private Double discount;

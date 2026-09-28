@@ -15,6 +15,7 @@ type Line = {
   unitName?: string;
   qty: number;
   price: number;
+  mrp?: number;
   discount: number;
   total: number;
   gst: number;
@@ -117,21 +118,21 @@ const PrintBill: React.FC = () => {
             {hasVal(bill.customerGstin) && <div>GSTIN: {bill.customerGstin}</div>}
           </div>
           <div className="th-dash" />
-          <div className="th-row th-bold th-small">
-            <span style={{ width: '50%' }}>ITEM</span>
-            <span style={{ width: '15%', textAlign: 'center' }}>QTY</span>
-            <span style={{ width: '17%', textAlign: 'right' }}>RATE</span>
-            <span style={{ width: '18%', textAlign: 'right' }}>AMT</span>
+          <div className="th-nums th-bold th-small">
+            <span>QTY</span>
+            <span>MRP</span>
+            <span>RATE</span>
+            <span>AMT</span>
           </div>
           <div className="th-dash" />
           {calc.items.map((item, i) => (
             <div className="th-item" key={i}>
-              <div className="th-bold th-small">{item.name}</div>
-              <div className="th-row th-small">
-                <span style={{ width: '50%' }}>{item.gst > 0 ? `GST ${item.gst}%` : ''}</span>
-                <span style={{ width: '15%', textAlign: 'center' }}>{item.qty}</span>
-                <span style={{ width: '17%', textAlign: 'right' }}>{money(item.price)}</span>
-                <span style={{ width: '18%', textAlign: 'right' }}>{money(item.total)}</span>
+              <div className="th-bold th-small">{item.name}{item.gst > 0 ? ` (${item.gst}%)` : ''}</div>
+              <div className="th-nums th-small">
+                <span>{item.qty}</span>
+                <span>{money(item.mrp || item.price)}</span>
+                <span>{money(item.price)}</span>
+                <span>{money(item.total)}</span>
               </div>
               {Number(item.discount) > 0 && <div className="th-small" style={{ textAlign: 'right' }}>Disc: -{money(item.discount)}</div>}
             </div>

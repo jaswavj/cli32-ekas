@@ -9,5 +9,6 @@ public class BulkUpdateItem {
     private String code;
     private Double cost;
     private Double mrp;
+    private Double actualMrp;
     private Integer gst;
 }

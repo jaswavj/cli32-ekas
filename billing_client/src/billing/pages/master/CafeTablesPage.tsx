@@ -94,10 +94,10 @@ const CafeTablesPage: React.FC = () => {
             <table className="mst-table">
               <thead>
                 <tr>
-                  <th>#</th>
+                  <th className="mst-col-idx">#</th>
                   <th>Name</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  <th className="mst-col-act">Action</th>
                 </tr>
               </thead>
               <tbody>

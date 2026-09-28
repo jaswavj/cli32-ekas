@@ -12,6 +12,7 @@ type BulkRow = {
   gst: number;
   categoryName: string;
   mrp: number;
+  actualMrp: number;
   batchId: number;
   cost: number;
   brandName: string;
@@ -59,6 +60,7 @@ const ProductMasterPage: React.FC = () => {
           code: r.code,
           cost: Number(r.cost),
           mrp: Number(r.mrp),
+          actualMrp: Number(r.actualMrp),
           gst: Number(r.gst),
         }))
       );
@@ -111,6 +113,7 @@ const ProductMasterPage: React.FC = () => {
                 <th>{heads.head1}</th>
                 <th>{heads.head2}</th>
                 <th className="num">Cost</th>
+                <th className="num">Selling Price</th>
                 <th className="num">MRP</th>
                 <th>GST</th>
               </tr>
@@ -130,6 +133,9 @@ const ProductMasterPage: React.FC = () => {
                   </td>
                   <td>
                     <input className="mst-inp" type="number" step="0.001" value={row.mrp} onChange={(e) => updateRow(i, { mrp: Number(e.target.value) })} />
+                  </td>
+                  <td>
+                    <input className="mst-inp" type="number" step="0.001" value={row.actualMrp} onChange={(e) => updateRow(i, { actualMrp: Number(e.target.value) })} />
                   </td>
                   <td>
                     <select className="mst-sel" value={row.gst} onChange={(e) => updateRow(i, { gst: Number(e.target.value) })}>

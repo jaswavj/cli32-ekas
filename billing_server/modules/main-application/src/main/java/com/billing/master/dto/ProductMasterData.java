@@ -10,6 +10,7 @@ public class ProductMasterData {
     private String categoryName;
     private String brandName;
     private Double mrp;
+    private Double actualMrp;
     private String discountDisplay;
     private Double stock;
     private Double addedStock;

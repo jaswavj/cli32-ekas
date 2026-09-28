@@ -124,6 +124,48 @@
   font-weight: 600;
 }
 
+.mst-more {
+  grid-column: 1 / -1;
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 14%, transparent);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--color-bg-page);
+}
+
+.mst-more-tgl {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: none;
+  background: color-mix(in srgb, var(--color-primary) 7%, var(--color-bg-surface));
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.mst-more-tgl span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mst-more-tgl i {
+  color: var(--color-primary);
+}
+
+.mst-more-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+  border-top: 1.5px solid color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
 .mst-actions {
   display: flex;
   gap: 8px;
@@ -186,13 +228,13 @@
   width: 100%;
   min-width: 0;
   min-height: 0;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 .mst-table {
   width: 100%;
-  min-width: 860px;
   border-collapse: collapse;
   font-size: 0.85rem;
 }
@@ -203,7 +245,8 @@
 
 .mst-table .mst-inp,
 .mst-table .mst-sel {
-  min-width: 80px;
+  min-width: 0;
+  width: 100%;
 }
 
 .mst-table th,
@@ -212,6 +255,42 @@
   border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 8%, transparent);
   text-align: left;
   vertical-align: middle;
+}
+
+/* Side-by-side master lists: columns fit the card, no horizontal scrollbar */
+.mst-grid .mst-table-wrap,
+.mst-grid-wide .mst-table-wrap {
+  overflow-x: hidden;
+}
+
+.mst-grid .mst-table,
+.mst-grid-wide .mst-table {
+  table-layout: fixed;
+}
+
+.mst-grid .mst-table th,
+.mst-grid .mst-table td,
+.mst-grid-wide .mst-table th,
+.mst-grid-wide .mst-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mst-col-idx {
+  width: 44px;
+}
+
+.mst-col-act {
+  width: 72px;
+}
+
+.mst-col-code {
+  width: 18%;
+}
+
+.mst-col-num {
+  width: 88px;
 }
 
 .mst-table th {
@@ -298,6 +377,10 @@
   }
 
   .mst-form {
+    grid-template-columns: 1fr;
+  }
+
+  .mst-more-body {
     grid-template-columns: 1fr;
   }
 }

@@ -241,7 +241,8 @@ public class BillingReadService {
                 "SELECT p.code, p.name, d.qty, d.price, d.disc, d.total, d.gst, " +
                         "IFNULL(cat.name,'') AS category_name, " +
                         "CASE WHEN p.hsn IS NULL OR p.hsn = 0 THEN '' ELSE CAST(p.hsn AS CHAR) END AS hsn, " +
-                        "IFNULL(u.name,'') AS unit_name " +
+                        "IFNULL(u.name,'') AS unit_name, " +
+                        "COALESCE(NULLIF((SELECT b.actual_mrp FROM prod_batch b WHERE b.product_id = p.id LIMIT 1), 0), d.price) AS mrp " +
                         "FROM prod_bill_details d JOIN prod_product p ON p.id = d.prod_id " +
                         "JOIN prod_bill b ON b.id = d.bill_id " +
                         "LEFT JOIN prod_category cat ON cat.id = p.category_id " +
@@ -256,6 +257,7 @@ public class BillingReadService {
                     line.setUnitName(nz(rs.getString("unit_name")));
                     line.setQty(rs.getDouble("qty"));
                     line.setPrice(rs.getDouble("price"));
+                    line.setMrp(rs.getDouble("mrp"));
                     line.setDiscount(rs.getDouble("disc"));
                     line.setTotal(rs.getDouble("total"));
                     line.setGst(rs.getInt("gst"));

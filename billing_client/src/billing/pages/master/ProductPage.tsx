@@ -13,6 +13,7 @@ type Product = {
   categoryName: string;
   brandName: string;
   mrp: number;
+  actualMrp: number;
   stock: number;
   cost: number;
   discType: number;
@@ -37,6 +38,7 @@ const emptyForm = {
   stock: '0',
   cost: '',
   mrp: '',
+  actualMrp: '',
   commission: '0.00',
   discType: '0',
   discount: '0.00',
@@ -55,6 +57,7 @@ const ProductPage: React.FC = () => {
   const [form, setForm] = useState(emptyForm);
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);
+  const [otherOpen, setOtherOpen] = useState(false);
 
   const load = async () => {
     try {
@@ -92,7 +95,7 @@ const ProductPage: React.FC = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.categoryId || !form.brandId || !form.name.trim() || !form.unitId || form.cost === '' || form.mrp === '') {
+    if (!form.categoryId || !form.brandId || !form.name.trim() || !form.unitId || form.cost === '' || form.mrp === '' || form.actualMrp === '') {
       toast.warning('Please fill the required product fields');
       return;
     }
@@ -113,6 +116,7 @@ const ProductPage: React.FC = () => {
           stock: Number(form.stock || 0),
           cost: Number(form.cost),
           mrp: Number(form.mrp),
+          actualMrp: Number(form.actualMrp),
           commission: Number(form.commission || 0),
           discType: Number(form.discType),
           discount: Number(form.discount || 0),
@@ -121,6 +125,7 @@ const ProductPage: React.FC = () => {
         toast.success(form.id ? `${heads.head3} updated` : `${heads.head3} added`);
       }
       setForm(emptyForm);
+      setOtherOpen(false);
       await load();
     } catch (err) {
       toast.error(masterError(err, 'Save failed'));
@@ -179,10 +184,6 @@ const ProductPage: React.FC = () => {
               <input className="mst-inp" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
             </div>
             <div className="mst-fg">
-              <label>HSN Code</label>
-              <input className="mst-inp" value={form.hsn} onChange={(e) => setForm({ ...form, hsn: e.target.value })} />
-            </div>
-            <div className="mst-fg">
               <label>Unit/Size <span className="req">*</span></label>
               <select className="mst-sel" value={form.unitId} onChange={(e) => setForm({ ...form, unitId: e.target.value })}>
                 <option value="">Select Unit/Size</option>
@@ -192,54 +193,79 @@ const ProductPage: React.FC = () => {
               </select>
             </div>
             <div className="mst-fg">
-              <label>Stock</label>
-              <input className="mst-inp" type="number" min="0" step="0.01" disabled={form.id > 0} value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
-              {selectedUnit?.convertionUnit && <span className="mst-note">Conversion: {selectedUnit.convertionUnit}</span>}
-            </div>
-            <div className="mst-fg">
               <label>Cost Price <span className="req">*</span></label>
               <input className="mst-inp" type="number" step="0.001" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} />
             </div>
             <div className="mst-fg">
-              <label>MRP <span className="req">*</span></label>
+              <label>Selling Price <span className="req">*</span></label>
               <input className="mst-inp" type="number" step="0.001" value={form.mrp} onChange={(e) => setForm({ ...form, mrp: e.target.value })} />
             </div>
             <div className="mst-fg">
-              <label>Commission (Rs)</label>
-              <input className="mst-inp" type="number" step="0.01" value={form.commission} onChange={(e) => setForm({ ...form, commission: e.target.value })} />
+              <label>MRP <span className="req">*</span></label>
+              <input className="mst-inp" type="number" step="0.001" value={form.actualMrp} onChange={(e) => setForm({ ...form, actualMrp: e.target.value })} />
             </div>
-            <div className="mst-fg">
-              <label>Discount Type</label>
-              <select
-                className="mst-sel"
-                value={form.discType}
-                onChange={(e) => setForm({ ...form, discType: e.target.value, discount: e.target.value === '0' ? '0.00' : form.discount })}
+            <div className="mst-more">
+              <button
+                className="mst-more-tgl"
+                type="button"
+                aria-expanded={otherOpen}
+                onClick={() => setOtherOpen((open) => !open)}
               >
-                <option value="0">Select Type</option>
-                <option value="1">Rs</option>
-                <option value="2">%</option>
-              </select>
-            </div>
-            <div className="mst-fg">
-              <label>Discount</label>
-              <input
-                className="mst-inp"
-                type="number"
-                step="0.01"
-                readOnly={form.discType === '0'}
-                value={form.discount}
-                onChange={(e) => setForm({ ...form, discount: e.target.value })}
-              />
-            </div>
-            <div className="mst-fg">
-              <label>GST %</label>
-              <select className="mst-sel" value={form.gst} onChange={(e) => setForm({ ...form, gst: e.target.value })}>
-                <option value="0">0%</option>
-                <option value="5">5%</option>
-                <option value="12">12%</option>
-                <option value="18">18%</option>
-                <option value="28">28%</option>
-              </select>
+                <span>
+                  <i className="fas fa-sliders-h" /> Other Details
+                </span>
+                <i className={`fas fa-chevron-${otherOpen ? 'up' : 'down'}`} />
+              </button>
+              {otherOpen && (
+                <div className="mst-more-body">
+                  <div className="mst-fg">
+                    <label>HSN Code</label>
+                    <input className="mst-inp" value={form.hsn} onChange={(e) => setForm({ ...form, hsn: e.target.value })} />
+                  </div>
+                  <div className="mst-fg">
+                    <label>Stock</label>
+                    <input className="mst-inp" type="number" min="0" step="0.01" disabled={form.id > 0} value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
+                    {selectedUnit?.convertionUnit && <span className="mst-note">Conversion: {selectedUnit.convertionUnit}</span>}
+                  </div>
+                  <div className="mst-fg">
+                    <label>Commission (Rs)</label>
+                    <input className="mst-inp" type="number" step="0.01" value={form.commission} onChange={(e) => setForm({ ...form, commission: e.target.value })} />
+                  </div>
+                  <div className="mst-fg">
+                    <label>Discount Type</label>
+                    <select
+                      className="mst-sel"
+                      value={form.discType}
+                      onChange={(e) => setForm({ ...form, discType: e.target.value, discount: e.target.value === '0' ? '0.00' : form.discount })}
+                    >
+                      <option value="0">Select Type</option>
+                      <option value="1">Rs</option>
+                      <option value="2">%</option>
+                    </select>
+                  </div>
+                  <div className="mst-fg">
+                    <label>Discount</label>
+                    <input
+                      className="mst-inp"
+                      type="number"
+                      step="0.01"
+                      readOnly={form.discType === '0'}
+                      value={form.discount}
+                      onChange={(e) => setForm({ ...form, discount: e.target.value })}
+                    />
+                  </div>
+                  <div className="mst-fg">
+                    <label>GST %</label>
+                    <select className="mst-sel" value={form.gst} onChange={(e) => setForm({ ...form, gst: e.target.value })}>
+                      <option value="0">0%</option>
+                      <option value="5">5%</option>
+                      <option value="12">12%</option>
+                      <option value="18">18%</option>
+                      <option value="28">28%</option>
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
             {form.id > 0 && (
               <label className="mst-block mst-check span-2">
@@ -252,7 +278,14 @@ const ProductPage: React.FC = () => {
                 {form.id ? 'Update' : `Add ${heads.head3}`}
               </button>
               {form.id > 0 && (
-                <button className="mst-btn mst-btn-outline" type="button" onClick={() => setForm(emptyForm)}>
+                <button
+                  className="mst-btn mst-btn-outline"
+                  type="button"
+                  onClick={() => {
+                    setForm(emptyForm);
+                    setOtherOpen(false);
+                  }}
+                >
                   Cancel
                 </button>
               )}
@@ -271,13 +304,11 @@ const ProductPage: React.FC = () => {
             <table className="mst-table">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Action</th>
+                  <th className="mst-col-idx">#</th>
+                  <th className="mst-col-act">Action</th>
                   <th>Name</th>
-                  <th>Code</th>
-                  <th>{heads.head1}</th>
-                  <th className="num">MRP</th>
-                  <th className="num">Stock</th>
+                  <th className="num mst-col-num">Selling</th>
+                  <th className="num mst-col-num">MRP</th>
                 </tr>
               </thead>
               <tbody>
@@ -288,7 +319,7 @@ const ProductPage: React.FC = () => {
                       <button
                         className="mst-icon-btn"
                         type="button"
-                        onClick={() =>
+                        onClick={() => {
                           setForm({
                             id: row.id,
                             categoryId: String(row.categoryId || ''),
@@ -300,22 +331,22 @@ const ProductPage: React.FC = () => {
                             stock: String(row.stock ?? 0),
                             cost: String(row.cost ?? ''),
                             mrp: String(row.mrp ?? ''),
+                            actualMrp: String(row.actualMrp ?? row.mrp ?? ''),
                             commission: String(row.commission ?? 0),
                             discType: String(row.discType ?? 0),
                             discount: String(row.discount ?? 0),
                             gst: String(row.gst ?? 0),
                             blockIt: false,
-                          })
-                        }
+                          });
+                          setOtherOpen(true);
+                        }}
                       >
                         <i className="fas fa-edit" />
                       </button>
                     </td>
-                    <td>{row.name}</td>
-                    <td>{row.code}</td>
-                    <td>{row.categoryName}</td>
+                    <td title={row.name}>{row.name}</td>
                     <td className="num">{Number(row.mrp || 0).toFixed(2)}</td>
-                    <td className="num">{Number(row.stock || 0).toFixed(3)}</td>
+                    <td className="num">{Number(row.actualMrp || 0).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>

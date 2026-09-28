@@ -19,6 +19,7 @@ import com.billing.master.dto.StockAdjustRequest;
 import com.billing.master.dto.StockProductData;
 import com.billing.master.dto.UnitData;
 import com.billing.master.dto.UnitSaveRequest;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -39,6 +40,18 @@ import java.util.List;
 public class MasterService {
 
     private final JdbcTemplate jdbcTemplate;
+
+    @PostConstruct
+    void ensureActualMrpColumn() {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'prod_batch' AND COLUMN_NAME = 'actual_mrp'",
+                Integer.class
+        );
+        if (count == null || count == 0) {
+            jdbcTemplate.execute("ALTER TABLE prod_batch ADD COLUMN actual_mrp double(10,3) NOT NULL DEFAULT '0.000' AFTER mrp");
+            jdbcTemplate.update("UPDATE prod_batch SET actual_mrp = mrp WHERE actual_mrp = 0");
+        }
+    }
 
     public HeadingData headings() {
         HeadingData data = new HeadingData();
@@ -224,7 +237,7 @@ public class MasterService {
 
     public List<ProductMasterData> products() {
         return jdbcTemplate.query(
-                "SELECT a.id, a.name, a.code, b.name AS category_name, c.name AS brand_name, d.mrp, " +
+                "SELECT a.id, a.name, a.code, b.name AS category_name, c.name AS brand_name, d.mrp, d.actual_mrp, " +
                         "CASE WHEN d.disc_type = 1 THEN CONCAT(CAST(d.discount AS UNSIGNED), ' RS') " +
                         "WHEN d.disc_type = 2 THEN CONCAT(CAST(d.discount AS UNSIGNED), ' %') ELSE 'No Discount' END AS discount_display, " +
                         "d.stock, d.added_stock, d.cost, d.disc_type, d.discount, a.gst, a.unit_id, a.hsn, e.name AS unit_name, d.commission, " +
@@ -243,6 +256,7 @@ public class MasterService {
                     row.setCategoryName(rs.getString("category_name"));
                     row.setBrandName(rs.getString("brand_name"));
                     row.setMrp(rs.getDouble("mrp"));
+                    row.setActualMrp(rs.getDouble("actual_mrp"));
                     row.setDiscountDisplay(rs.getString("discount_display"));
                     row.setStock(rs.getDouble("stock"));
                     row.setAddedStock(rs.getDouble("added_stock"));
@@ -289,6 +303,7 @@ public class MasterService {
         String code = request.getCode() == null || request.getCode().isBlank() ? "0" : request.getCode().trim();
         double costValue = nz(request.getCost());
         double mrpValue = nz(request.getMrp());
+        double actualMrpValue = request.getActualMrp() == null ? mrpValue : nz(request.getActualMrp());
         double commissionValue = nz(request.getCommission());
         int discType = request.getDiscType() == null ? 0 : request.getDiscType();
         double discount = nz(request.getDiscount());
@@ -303,10 +318,12 @@ public class MasterService {
             stockValue = stockValue.multiply(convertion);
             costValue = BigDecimal.valueOf(costValue).divide(convertion, 6, RoundingMode.HALF_UP).doubleValue();
             mrpValue = BigDecimal.valueOf(mrpValue).divide(convertion, 6, RoundingMode.HALF_UP).doubleValue();
+            actualMrpValue = BigDecimal.valueOf(actualMrpValue).divide(convertion, 6, RoundingMode.HALF_UP).doubleValue();
             commissionValue = BigDecimal.valueOf(commissionValue).divide(convertion, 6, RoundingMode.HALF_UP).doubleValue();
         }
         final double cost = costValue;
         final double mrp = mrpValue;
+        final double actualMrp = actualMrpValue;
         final double commission = commissionValue;
         final BigDecimal stock = stockValue;
 
@@ -318,8 +335,8 @@ public class MasterService {
             );
             archiveBatch(request.getId(), uid);
             jdbcTemplate.update(
-                    "UPDATE prod_batch SET name = CONCAT('Z', ?), cost=?, mrp=?, disc_type=?, discount=?, commission=? WHERE product_id=?",
-                    code, cost, mrp, discType, discount, commission, request.getId()
+                    "UPDATE prod_batch SET name = CONCAT('Z', ?), cost=?, mrp=?, actual_mrp=?, disc_type=?, discount=?, commission=? WHERE product_id=?",
+                    code, cost, mrp, actualMrp, discType, discount, commission, request.getId()
             );
         } else {
             KeyHolder productKeys = new GeneratedKeyHolder();
@@ -347,19 +364,20 @@ public class MasterService {
             KeyHolder batchKeys = new GeneratedKeyHolder();
             jdbcTemplate.update(con -> {
                 PreparedStatement ps = con.prepareStatement(
-                        "INSERT INTO prod_batch (NAME, product_id, cost, mrp, stock, disc_type, discount, DATE, TIME, added_stock, uid, commission) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), ?, ?, ?)",
+                        "INSERT INTO prod_batch (NAME, product_id, cost, mrp, actual_mrp, stock, disc_type, discount, DATE, TIME, added_stock, uid, commission) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), ?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS
                 );
                 ps.setString(1, "Z" + code);
                 ps.setLong(2, productId);
                 ps.setDouble(3, cost);
                 ps.setDouble(4, mrp);
-                ps.setBigDecimal(5, stock);
-                ps.setInt(6, discType);
-                ps.setDouble(7, discount);
-                ps.setBigDecimal(8, stock);
-                ps.setLong(9, uid);
-                ps.setDouble(10, commission);
+                ps.setDouble(5, actualMrp);
+                ps.setBigDecimal(6, stock);
+                ps.setInt(7, discType);
+                ps.setDouble(8, discount);
+                ps.setBigDecimal(9, stock);
+                ps.setLong(10, uid);
+                ps.setDouble(11, commission);
                 return ps;
             }, batchKeys);
             long batchId = requireGeneratedId(batchKeys);
@@ -549,7 +567,7 @@ public class MasterService {
 
     public List<BulkProductData> bulkProducts(String name, Long categoryId) {
         StringBuilder sql = new StringBuilder(
-                "SELECT p.id, p.name, p.code, p.gst, c.name AS category_name, b.mrp, b.id AS batch_id, b.cost, br.name AS brand_name " +
+                "SELECT p.id, p.name, p.code, p.gst, c.name AS category_name, b.mrp, b.actual_mrp, b.id AS batch_id, b.cost, br.name AS brand_name " +
                         "FROM prod_product p " +
                         "JOIN prod_category c ON p.category_id = c.id " +
                         "JOIN prod_brands br ON p.brand_id = br.id " +
@@ -574,6 +592,7 @@ public class MasterService {
             row.setGst(rs.getInt("gst"));
             row.setCategoryName(rs.getString("category_name"));
             row.setMrp(rs.getDouble("mrp"));
+            row.setActualMrp(rs.getDouble("actual_mrp"));
             row.setBatchId(rs.getLong("batch_id"));
             row.setCost(rs.getDouble("cost"));
             row.setBrandName(rs.getString("brand_name"));
@@ -596,8 +615,11 @@ public class MasterService {
                     item.getProductId()
             );
             int r2 = jdbcTemplate.update(
-                    "UPDATE prod_batch SET cost = ?, mrp = ? WHERE id = ?",
-                    nz(item.getCost()), nz(item.getMrp()), item.getBatchId()
+                    "UPDATE prod_batch SET cost = ?, mrp = ?, actual_mrp = ? WHERE id = ?",
+                    nz(item.getCost()),
+                    nz(item.getMrp()),
+                    item.getActualMrp() == null ? nz(item.getMrp()) : nz(item.getActualMrp()),
+                    item.getBatchId()
             );
             if (r1 > 0 && r2 > 0) updated++;
         }

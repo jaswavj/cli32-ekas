@@ -120,11 +120,11 @@ const ConfigMaterialPage: React.FC = () => {
             <table className="mst-table">
               <thead>
                 <tr>
-                  <th>#</th>
+                  <th className="mst-col-idx">#</th>
                   <th>Name</th>
-                  <th>Code</th>
-                  <th className="num">Qty</th>
-                  <th>Action</th>
+                  <th className="mst-col-code">Code</th>
+                  <th className="num mst-col-num">Qty</th>
+                  <th className="mst-col-act">Action</th>
                 </tr>
               </thead>
               <tbody>

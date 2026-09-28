@@ -45,6 +45,7 @@ public class PrintBillData {
         private String unitName;
         private Double qty;
         private Double price;
+        private Double mrp;
         private Double discount;
         private Double total;
         private Integer gst;
