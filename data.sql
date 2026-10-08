@@ -69,13 +69,16 @@ CREATE TABLE `company_details` (
   `printer_name` varchar(255) DEFAULT NULL,
   `bank_details` varchar(255) DEFAULT NULL,
   `barcode_printer` varchar(255) DEFAULT NULL,
+  `barcode_per_row` int NOT NULL DEFAULT '1',
+  `barcode_width_mm` int NOT NULL DEFAULT '50',
+  `barcode_height_mm` int NOT NULL DEFAULT '30',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `company_details` */
 
-insert  into `company_details`(`id`,`shop_name`,`address`,`gstin`,`print_type`,`printer_name`,`bank_details`,`barcode_printer`) values 
-(2,'EKAS MINI  SUPER MARKET','Gowtham Complex, Indra Nagar, Chennai  Road,  Kumbakonam 612002.\n cell - 9952305296\nFSSAI; 22426209000568','',1,'TVS-E RP 3230','','AP4909');
+insert  into `company_details`(`id`,`shop_name`,`address`,`gstin`,`print_type`,`printer_name`,`bank_details`,`barcode_printer`,`barcode_per_row`,`barcode_width_mm`,`barcode_height_mm`) values 
+(2,'EKAS MINI  SUPER MARKET','Gowtham Complex, Indra Nagar, Chennai  Road,  Kumbakonam 612002.\n cell - 9952305296\nFSSAI; 22426209000568','',1,'TVS-E RP 3230','','CODE128',3,50,30);
 
 /*Table structure for table `configure_bank_details` */
 

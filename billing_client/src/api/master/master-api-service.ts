@@ -45,6 +45,8 @@ export class MasterApiService {
   bulkUpdate = (payload: any) => this.http.post('/v1/master/bulk-products', payload);
 
   barcodes = () => this.http.get('/v1/master/barcodes');
+  printBarcodes = (payload: { items: { name: string; code: string; mrp: number; qty: number }[] }) =>
+    this.http.post('/v1/master/barcodes/print', payload);
 }
 
 export const masterApi = new MasterApiService();

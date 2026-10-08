@@ -12,6 +12,9 @@ const empty = {
   printerName: '',
   bankDetails: '',
   barcodePrinter: '',
+  barcodePerRow: 1,
+  barcodeWidthMm: 50,
+  barcodeHeightMm: 30,
 };
 
 const CompanyDetailsPage: React.FC = () => {
@@ -48,6 +51,9 @@ const CompanyDetailsPage: React.FC = () => {
         printerName: form.printType === 1 ? form.printerName.trim() : '',
         bankDetails: form.bankDetails.trim(),
         barcodePrinter: form.barcodePrinter.trim(),
+        barcodePerRow: Number(form.barcodePerRow) || 1,
+        barcodeWidthMm: Number(form.barcodeWidthMm) || 50,
+        barcodeHeightMm: Number(form.barcodeHeightMm) || 30,
       });
       toast.success('Company details saved');
     } catch (err) {
@@ -96,7 +102,22 @@ const CompanyDetailsPage: React.FC = () => {
           )}
           <div className="mst-fg">
             <label>Barcode Printer Name</label>
-            <input className="mst-inp" value={form.barcodePrinter} onChange={(e) => setForm({ ...form, barcodePrinter: e.target.value })} />
+            <input className="mst-inp" value={form.barcodePrinter} onChange={(e) => setForm({ ...form, barcodePrinter: e.target.value })} placeholder="Windows printer name" />
+            <div className="mst-note">Used for product barcode labels. The printer cuts when the last label ends.</div>
+          </div>
+          <div className="usr-barcode-layout">
+            <div className="mst-fg">
+              <label>Labels per row</label>
+              <input className="mst-inp" type="number" min={1} max={12} value={form.barcodePerRow} onChange={(e) => setForm({ ...form, barcodePerRow: Number(e.target.value) })} />
+            </div>
+            <div className="mst-fg">
+              <label>Width (mm)</label>
+              <input className="mst-inp" type="number" min={20} max={210} value={form.barcodeWidthMm} onChange={(e) => setForm({ ...form, barcodeWidthMm: Number(e.target.value) })} />
+            </div>
+            <div className="mst-fg">
+              <label>Height (mm)</label>
+              <input className="mst-inp" type="number" min={15} max={150} value={form.barcodeHeightMm} onChange={(e) => setForm({ ...form, barcodeHeightMm: Number(e.target.value) })} />
+            </div>
           </div>
           <div className="mst-actions">
             <button className="mst-btn mst-btn-primary" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save Details'}</button>

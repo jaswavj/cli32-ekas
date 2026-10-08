@@ -1,6 +1,7 @@
 package com.billing.master;
 
 import com.billing.core.response.ResponseDO;
+import com.billing.master.dto.BarcodePrintRequest;
 import com.billing.master.dto.BulkUpdateItem;
 import com.billing.master.dto.ComponentSaveRequest;
 import com.billing.master.dto.CustomerSaveRequest;
@@ -27,6 +28,7 @@ import java.util.List;
 public class MasterController {
 
     private final MasterService masterService;
+    private final BarcodePrinterService barcodePrinterService;
     private final PlatformSecurityContext securityContext;
 
     @GetMapping("/lookups")
@@ -178,6 +180,11 @@ public class MasterController {
     @GetMapping("/barcodes")
     public ResponseDO barcodes() {
         return ok(masterService.barcodes());
+    }
+
+    @PostMapping("/barcodes/print")
+    public ResponseDO printBarcodes(@RequestBody BarcodePrintRequest request) {
+        return ok(barcodePrinterService.print(request));
     }
 
     private Long currentUserId() {

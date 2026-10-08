@@ -628,7 +628,7 @@ public class MasterService {
 
     public List<BarcodeItemData> barcodes() {
         return jdbcTemplate.query(
-                "SELECT p.id, p.name, p.code, COALESCE(MAX(b.mrp), 0) AS mrp, COALESCE(u.name, 'N/A') AS unit " +
+                "SELECT p.id, p.name, p.code, COALESCE(NULLIF(MAX(b.actual_mrp), 0), MAX(b.mrp), 0) AS mrp, COALESCE(u.name, 'N/A') AS unit " +
                         "FROM prod_product p " +
                         "LEFT JOIN prod_batch b ON p.id = b.product_id " +
                         "LEFT JOIN prod_units u ON p.unit_id = u.id " +
