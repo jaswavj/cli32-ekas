@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
+import { adminApi, adminData } from '../../../api/admin/admin-api-service';
 import { masterApi, masterData, masterError } from '../../../api/master/master-api-service';
 import './Master.css';
 
 type Item = { id: number; name: string; code: string; mrp: number; unit: string };
 type QueueItem = Item & { qty: number };
+type Layout = { barcodePerRow: number; barcodeWidthMm: number; barcodeHeightMm: number };
 
 const BarcodePage: React.FC = () => {
   const [rows, setRows] = useState<Item[]>([]);
@@ -12,6 +14,7 @@ const BarcodePage: React.FC = () => {
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);
+  const [layout, setLayout] = useState<Layout>({ barcodePerRow: 1, barcodeWidthMm: 50, barcodeHeightMm: 30 });
 
   useEffect(() => {
     masterApi
@@ -26,6 +29,17 @@ const BarcodePage: React.FC = () => {
         setQty(start);
       })
       .catch((err) => toast.error(masterError(err, 'Could not load barcodes')));
+    adminApi
+      .company()
+      .then((res) => {
+        const c = adminData<any>(res);
+        setLayout({
+          barcodePerRow: Number(c.barcodePerRow) || 1,
+          barcodeWidthMm: Number(c.barcodeWidthMm) || 50,
+          barcodeHeightMm: Number(c.barcodeHeightMm) || 30,
+        });
+      })
+      .catch(() => undefined);
   }, []);
 
   const filtered = useMemo(
@@ -54,13 +68,16 @@ const BarcodePage: React.FC = () => {
     setQueue((prev) => prev.map((q) => (q.id === id ? { ...q, qty: Math.max(1, value || 1) } : q)));
   };
 
+  const queuedLabels = () => queue.flatMap((item) => Array.from({ length: item.qty }, () => item));
+
   const openPreview = (
     labels: QueueItem[],
-    layout?: { barcodePerRow?: number; barcodeWidthMm?: number; barcodeHeightMm?: number }
+    opts: Layout & { mode: 'sheet' | 'thermal' }
   ) => {
-    const perRow = Math.max(1, Math.min(12, Number(layout?.barcodePerRow) || 1));
-    const w = Math.max(20, Number(layout?.barcodeWidthMm) || 50);
-    const h = Math.max(15, Number(layout?.barcodeHeightMm) || 30);
+    const thermal = opts.mode === 'thermal';
+    const perRow = thermal ? 1 : Math.max(1, Math.min(12, Number(opts.barcodePerRow) || 1));
+    const w = thermal ? 72 : Math.max(20, Number(opts.barcodeWidthMm) || 50);
+    const h = Math.max(15, Number(opts.barcodeHeightMm) || 30);
     const pageW = perRow * w;
     const winW = Math.min(920, Math.max(260, Math.round(pageW * 3.8)));
     const winH = Math.min(520, Math.max(180, Math.round(h * 3.8) + 80));
@@ -173,8 +190,12 @@ const BarcodePage: React.FC = () => {
         toast.success(res.message);
         return;
       }
-      const labels = queue.flatMap((item) => Array.from({ length: item.qty }, () => item));
-      openPreview(labels, res);
+      openPreview(queuedLabels(), {
+        barcodePerRow: Number(res.barcodePerRow) || layout.barcodePerRow,
+        barcodeWidthMm: Number(res.barcodeWidthMm) || layout.barcodeWidthMm,
+        barcodeHeightMm: Number(res.barcodeHeightMm) || layout.barcodeHeightMm,
+        mode: 'sheet',
+      });
     } catch (err) {
       toast.error(masterError(err, 'Barcode print failed'));
     } finally {
@@ -267,16 +288,24 @@ const BarcodePage: React.FC = () => {
                 </button>
               </div>
             ))}
-            <div className="mst-actions" style={{ marginTop: 12 }}>
+            <div className="mst-actions" style={{ marginTop: 12, flexWrap: 'wrap' }}>
               <button className="mst-btn mst-btn-primary" type="button" disabled={busy || queue.length === 0} onClick={printQueue}>
                 <i className="fas fa-print" /> {busy ? 'Printing…' : `Print ${queueCount || ''}`.trim()}
+              </button>
+              <button
+                className="mst-btn mst-btn-outline"
+                type="button"
+                disabled={queue.length === 0}
+                onClick={() => openPreview(queuedLabels(), { ...layout, mode: 'sheet' })}
+              >
+                Save PDF sheet
               </button>
               <button className="mst-btn mst-btn-outline" type="button" disabled={queue.length === 0} onClick={() => setQueue([])}>
                 Clear
               </button>
             </div>
             <p className="mst-note" style={{ marginTop: 10 }}>
-              Qty on each row is how many labels to print. Size and labels per row are saved in Company Details.
+              Print goes to Barcode Printer Name. If that is empty, Windows opens with labels per row, width and height from Company Details.
             </p>
           </div>
         </div>

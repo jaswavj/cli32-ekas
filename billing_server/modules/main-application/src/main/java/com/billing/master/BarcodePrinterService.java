@@ -47,12 +47,11 @@ public class BarcodePrinterService {
         }
 
         CompanyDetailsData company = adminService.company();
-        String printerName = firstName(company.getBarcodePrinter(), company.getPrinterName());
-        PrintService service = findPrintService(printerName);
+        PrintService service = resolveBarcodePrinter(company);
         if (service == null) {
             PrintDispatchData data = new PrintDispatchData();
             data.setType("preview");
-            data.setMessage("Barcode printer not found. Opening print preview.");
+            data.setMessage("No barcode printer. Opening Windows print with saved labels per row and size.");
             applyLayout(data, company);
             return data;
         }
@@ -155,13 +154,26 @@ public class BarcodePrinterService {
         }
     }
 
+    private PrintService resolveBarcodePrinter(CompanyDetailsData company) {
+        return findPrintService(company.getBarcodePrinter());
+    }
+
     private PrintService findPrintService(String printerName) {
         if (printerName == null || printerName.isBlank()) {
             return null;
         }
+        String want = printerName.trim().toLowerCase();
         PrintService[] services = PrintServiceLookup.lookupPrintServices(null, null);
         for (PrintService service : services) {
-            if (service.getName().toLowerCase().contains(printerName.toLowerCase())) {
+            String have = service.getName() == null ? "" : service.getName().toLowerCase();
+            if (have.equals(want) || have.contains(want) || want.contains(have)) {
+                return service;
+            }
+        }
+        String compactWant = want.replaceAll("[^a-z0-9]", "");
+        for (PrintService service : services) {
+            String compactHave = service.getName() == null ? "" : service.getName().toLowerCase().replaceAll("[^a-z0-9]", "");
+            if (!compactWant.isEmpty() && (compactHave.contains(compactWant) || compactWant.contains(compactHave))) {
                 return service;
             }
         }
@@ -180,13 +192,6 @@ public class BarcodePrinterService {
         data.setBarcodePerRow(company.getBarcodePerRow() == null || company.getBarcodePerRow() < 1 ? 1 : company.getBarcodePerRow());
         data.setBarcodeWidthMm(company.getBarcodeWidthMm() == null ? 50 : company.getBarcodeWidthMm());
         data.setBarcodeHeightMm(company.getBarcodeHeightMm() == null ? 30 : company.getBarcodeHeightMm());
-    }
-
-    private String firstName(String barcodePrinter, String billPrinter) {
-        if (barcodePrinter != null && !barcodePrinter.isBlank()) {
-            return barcodePrinter.trim();
-        }
-        return billPrinter == null ? "" : billPrinter.trim();
     }
 
     private String nz(String value) {
