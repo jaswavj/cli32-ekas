@@ -15,6 +15,7 @@ const BarcodePage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);
   const [layout, setLayout] = useState<Layout>({ barcodePerRow: 1, barcodeWidthMm: 50, barcodeHeightMm: 30 });
+  const [shopName, setShopName] = useState('');
 
   useEffect(() => {
     masterApi
@@ -33,6 +34,7 @@ const BarcodePage: React.FC = () => {
       .company()
       .then((res) => {
         const c = adminData<any>(res);
+        setShopName(String(c.shopName || '').trim());
         setLayout({
           barcodePerRow: Number(c.barcodePerRow) || 1,
           barcodeWidthMm: Number(c.barcodeWidthMm) || 50,
@@ -110,7 +112,7 @@ const BarcodePage: React.FC = () => {
           `<div class="row">${row
             .map((item) => {
               const n = idx++;
-              return `<div class="label"><div class="name">${esc(item.name)}</div><div class="mrp">MRP Rs ${item.mrp}</div><svg id="p-${n}"></svg><div class="code">${esc(item.code)}</div></div>`;
+              return `<div class="label">${shopName ? `<div class="shop">${esc(shopName)}</div>` : ''}<div class="name">${esc(item.name)}</div><svg id="p-${n}"></svg><div class="meta"><span class="code">${esc(item.code)}</span><span class="sep">-</span><span class="mrp">MRP Rs ${item.mrp}</span></div></div>`;
             })
             .join('')}</div>`
       )
@@ -147,9 +149,10 @@ const BarcodePage: React.FC = () => {
           align-items: center;
           justify-content: center;
         }
-        .name { font-size: ${h >= 28 ? 9 : 8}px; font-weight: 700; line-height: 1.15; max-width: ${w - 2}mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .mrp { font-size: ${h >= 28 ? 9 : 8}px; margin: 0.3mm 0; }
-        .code { font-size: 8px; letter-spacing: 0.3px; }
+        .shop { font-size: ${h >= 28 ? 9 : 8}px; font-weight: 700; line-height: 1.15; max-width: ${w - 2}mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .name { font-size: ${h >= 28 ? 8 : 7}px; font-weight: 700; line-height: 1.15; max-width: ${w - 2}mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .meta { display: flex; justify-content: center; align-items: baseline; gap: 1.2mm; margin-top: 0.4mm; max-width: ${w - 2}mm; }
+        .mrp, .code { font-size: ${h >= 28 ? 9 : 8}px; white-space: nowrap; }
         svg { width: ${svgW}mm; height: ${svgH}mm; }
       </style></head><body>
       ${rowsHtml}

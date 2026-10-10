@@ -110,15 +110,14 @@ public class BarcodePrinterService {
         if (!name.isBlank()) {
             write(out, clip(name, 28) + "\n");
         }
-        write(out, "MRP Rs " + DF.format(item.getMrp() == null ? 0 : item.getMrp()) + "\n");
         writeBarcode(out, code);
-        write(out, code + "\n");
+        write(out, code + " - MRP Rs " + DF.format(item.getMrp() == null ? 0 : item.getMrp()) + "\n");
     }
 
     private void writeBarcode(ByteArrayOutputStream out, String code) {
         write(out, new byte[]{0x1D, 0x68, 0x50});
         write(out, new byte[]{0x1D, 0x77, 0x02});
-        write(out, new byte[]{0x1D, 0x48, 0x02});
+        write(out, new byte[]{0x1D, 0x48, 0x00});
         byte[] data = ("{B" + code).getBytes(StandardCharsets.US_ASCII);
         if (data.length > 80) {
             throw new RuntimeException("Barcode value is too long: " + code);
