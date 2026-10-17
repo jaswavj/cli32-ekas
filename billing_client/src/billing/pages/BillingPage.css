@@ -137,8 +137,9 @@
   color: var(--color-text);
 }
 
-.pos-suggest button:hover {
-  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+.pos-suggest button:hover,
+.pos-suggest button.active {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
 }
 
 .pos-banner {

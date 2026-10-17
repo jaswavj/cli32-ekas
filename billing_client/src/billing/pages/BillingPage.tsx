@@ -67,6 +67,7 @@ const BillingPage: React.FC = () => {
 
   const [search, setSearch] = useState('');
   const [nameHits, setNameHits] = useState<string[]>([]);
+  const [hitIndex, setHitIndex] = useState(0);
   const [pending, setPending] = useState<Product | null>(null);
   const [qty, setQty] = useState('1');
   const [price, setPrice] = useState('');
@@ -74,6 +75,7 @@ const BillingPage: React.FC = () => {
   const [stock, setStock] = useState<number | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const qtyRef = useRef<HTMLInputElement>(null);
+  const suggestRef = useRef<HTMLDivElement>(null);
 
   const [lines, setLines] = useState<Line[]>([]);
   const [lineKey, setLineKey] = useState(1);
@@ -213,15 +215,40 @@ const BillingPage: React.FC = () => {
 
   const onSearchChange = async (value: string) => {
     setSearch(value);
+    setHitIndex(0);
     if (value.trim().length < 1) {
       setNameHits([]);
       return;
     }
     const res: any = await api.searchProducts(value.trim());
     setNameHits(res?.data || []);
+    setHitIndex(0);
   };
 
   const onSearchKey = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (nameHits.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHitIndex((i) => (i + 1) % nameHits.length);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHitIndex((i) => (i - 1 + nameHits.length) % nameHits.length);
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setNameHits([]);
+        return;
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        const name = nameHits[hitIndex] ?? nameHits[0];
+        if (name) await lookupByName(name);
+        return;
+      }
+    }
     if (e.key !== 'Enter' && e.key !== 'Tab') return;
     e.preventDefault();
     const val = search.trim();
@@ -236,9 +263,7 @@ const BillingPage: React.FC = () => {
       return;
     }
     if (await lookupByCode(val)) return;
-    const name = nameHits[0] || val;
-    if (await lookupByName(name)) return;
-    if (name !== val && (await lookupByName(val))) return;
+    if (await lookupByName(val)) return;
     toast.error(`Product not found: ${val}`);
   };
 
@@ -612,6 +637,11 @@ const BillingPage: React.FC = () => {
     };
   }, [a4Bill]);
 
+  useEffect(() => {
+    const btn = suggestRef.current?.querySelectorAll('button')[hitIndex] as HTMLButtonElement | undefined;
+    btn?.scrollIntoView({ block: 'nearest' });
+  }, [hitIndex, nameHits]);
+
   return (
     <div className="pos-wrap">
       <div className="pos-top">
@@ -636,9 +666,17 @@ const BillingPage: React.FC = () => {
               </span>
             )}
             {nameHits.length > 0 && (
-              <div className="pos-suggest">
-                {nameHits.map((name) => (
-                  <button key={name} type="button" onClick={() => lookupByName(name)}>{name}</button>
+              <div className="pos-suggest" ref={suggestRef}>
+                {nameHits.map((name, i) => (
+                  <button
+                    key={name}
+                    type="button"
+                    className={i === hitIndex ? 'active' : undefined}
+                    onMouseEnter={() => setHitIndex(i)}
+                    onClick={() => lookupByName(name)}
+                  >
+                    {name}
+                  </button>
                 ))}
               </div>
             )}
