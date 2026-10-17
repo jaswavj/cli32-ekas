@@ -111,7 +111,12 @@ public class BarcodePrinterService {
             write(out, clip(name, 28) + "\n");
         }
         writeBarcode(out, code);
-        write(out, code + " - MRP Rs " + DF.format(item.getMrp() == null ? 0 : item.getMrp()) + "\n");
+        write(out, code + "\n");
+        write(out, BOLD_ON);
+        write(out, new byte[]{0x1B, 0x21, 0x08});
+        write(out, "MRP Rs " + DF.format(item.getMrp() == null ? 0 : item.getMrp()) + "\n");
+        write(out, FONT_NORMAL);
+        write(out, BOLD_OFF);
     }
 
     private void writeBarcode(ByteArrayOutputStream out, String code) {

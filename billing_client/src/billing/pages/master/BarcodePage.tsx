@@ -112,7 +112,7 @@ const BarcodePage: React.FC = () => {
           `<div class="row">${row
             .map((item) => {
               const n = idx++;
-              return `<div class="label">${shopName ? `<div class="shop">${esc(shopName)}</div>` : ''}<div class="name">${esc(item.name)}</div><svg id="p-${n}"></svg><div class="meta"><span class="code">${esc(item.code)}</span><span class="sep">-</span><span class="mrp">MRP Rs ${item.mrp}</span></div></div>`;
+              return `<div class="label">${shopName ? `<div class="shop">${esc(shopName)}</div>` : ''}<div class="name">${esc(item.name)}</div><svg id="p-${n}"></svg><div class="code">${esc(item.code)}</div><div class="mrp">MRP Rs ${item.mrp}</div></div>`;
             })
             .join('')}</div>`
       )
@@ -151,8 +151,8 @@ const BarcodePage: React.FC = () => {
         }
         .shop { font-size: ${h >= 28 ? 9 : 8}px; font-weight: 700; line-height: 1.15; max-width: ${w - 2}mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .name { font-size: ${h >= 28 ? 8 : 7}px; font-weight: 700; line-height: 1.15; max-width: ${w - 2}mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .meta { display: flex; justify-content: center; align-items: baseline; gap: 1.2mm; margin-top: 0.4mm; max-width: ${w - 2}mm; }
-        .mrp, .code { font-size: ${h >= 28 ? 9 : 8}px; white-space: nowrap; }
+        .code { font-size: ${h >= 28 ? 9 : 8}px; margin-top: 0.3mm; white-space: nowrap; }
+        .mrp { font-size: ${h >= 28 ? 12 : 11}px; font-weight: 700; line-height: 1.15; white-space: nowrap; }
         svg { width: ${svgW}mm; height: ${svgH}mm; }
       </style></head><body>
       ${rowsHtml}
