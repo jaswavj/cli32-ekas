@@ -112,7 +112,7 @@ const BarcodePage: React.FC = () => {
           `<div class="row">${row
             .map((item) => {
               const n = idx++;
-              return `<div class="label">${shopName ? `<div class="shop">${esc(shopName)}</div>` : ''}<div class="name">${esc(item.name)}</div><svg id="p-${n}"></svg><div class="code">${esc(item.code)}</div><div class="mrp">MRP Rs ${item.mrp}</div></div>`;
+              return `<div class="label">${shopName ? `<div class="shop">${esc(shopName)}</div>` : ''}<div class="name">${esc(item.name)}</div><svg id="p-${n}"></svg><div class="code">${esc(item.code)}</div><div class="mrp">Rs ${item.mrp}</div></div>`;
             })
             .join('')}</div>`
       )
